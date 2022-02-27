@@ -6,6 +6,10 @@ public class RedBlackTreeMap<K extends Comparable<K>, V> {
     private static final boolean RED = false;
 
     private Node<K, V> root;
+    private int size;
+
+    public RedBlackTreeMap() {
+    }
 
     public void put(K key, V value) {
         Node<K, V> freshNode = null;
@@ -15,11 +19,13 @@ public class RedBlackTreeMap<K extends Comparable<K>, V> {
         }
         if (root == null) {
             root = new Node<>(key, value, null);
+            size++;
         } else {
-            freshNode = putNewNode(root, key, value, null);
+            freshNode = putNode(root, key, value, null);
         }
         if (freshNode != null) {
             balanceAfterPut(freshNode);
+            size++;
         }
     }
 
@@ -30,9 +36,9 @@ public class RedBlackTreeMap<K extends Comparable<K>, V> {
      * @param key key
      * @param value value
      * @param parent parent node for node param.
-     * @return null if key already exists. And new node if key is new.
+     * @return null if the key already exists. And a new node if the key is new.
      */
-    private Node<K, V> putNewNode(Node<K, V> node, K key, V value, Node<K, V> parent) {
+    private Node<K, V> putNode(Node<K, V> node, K key, V value, Node<K, V> parent) {
         if (node == null) {
             Node<K, V> freshNode = new Node<>(key, value, parent);
             if (key.compareTo(parent.key) < 0) {
@@ -44,16 +50,15 @@ public class RedBlackTreeMap<K extends Comparable<K>, V> {
         }
 
         if (key.compareTo(node.key) < 0) {
-            return putNewNode(node.left, key, value, node);
+            return putNode(node.left, key, value, node);
         } else if (key.compareTo(node.key) > 0) {
-            return putNewNode(node.right, key, value, node);
+            return putNode(node.right, key, value, node);
         } else {
             node.value = value;
             return null;
         }
     }
 
-    // TODO rename method to recoloring
     private void balanceAfterPut(Node<K, V> freshNode) {
         freshNode.color = RED;
 
@@ -153,6 +158,23 @@ public class RedBlackTreeMap<K extends Comparable<K>, V> {
     }
 
     /**
+     * Removes all of the mappings from this map.
+     * The map will be empty after this call returns.
+     */
+    public void clear() {
+        size = 0;
+        root = null;
+    }
+
+    public boolean isEmpty() {
+        return size == 0;
+    }
+
+    public int getSize() {
+        return size;
+    }
+
+    /**
      * WARNING! USED ONLY FOR TEST PURPOSE.
      *
      * @return inorder string representation of the tree.
@@ -173,6 +195,7 @@ public class RedBlackTreeMap<K extends Comparable<K>, V> {
         inorderTraversal(node.right, stringBuffer);
     }
 
+    // New node is always black
     static class Node<K extends Comparable<K>, V> {
         private K key;
         private V value;

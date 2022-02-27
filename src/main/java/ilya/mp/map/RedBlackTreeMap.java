@@ -11,6 +11,26 @@ public class RedBlackTreeMap<K extends Comparable<K>, V> {
     public RedBlackTreeMap() {
     }
 
+    /**
+     * Find node by specified key and return value.
+     *
+     * @return value if map contain given key, {@code null} otherwise.
+     */
+    public V get(K key) {
+        Node<K, V> node = getNode(key);
+        return node == null ? null : node.value;
+    }
+
+    /**
+     * @return {@code true} if mat contain given key, {@code null} otherwise.
+     */
+    public boolean contains(K key) {
+        return getNode(key) != null;
+    }
+
+    /**
+     * Adding new pair if map does not contain given key, otherwise update value.
+     */
     public void put(K key, V value) {
         Node<K, V> freshNode = null;
 
@@ -27,6 +47,30 @@ public class RedBlackTreeMap<K extends Comparable<K>, V> {
             balanceAfterPut(freshNode);
             size++;
         }
+    }
+
+    /**
+     * Returns this map's node for the given key, or {@code null} if the map
+     * does not contain node for the key.
+     *
+     * @return tree node.
+     * @throws IllegalArgumentException if the specified key is null.
+     */
+    private Node<K, V> getNode(K key) {
+        if (key == null) {
+            throw new IllegalArgumentException("Key cannot be null!");
+        }
+        Node<K, V> node = root;
+        while (node != null) {
+            int cmp = key.compareTo(node.key);
+            if (cmp < 0)
+                node = node.left;
+            else if (cmp > 0)
+                node = node.right;
+            else
+                return node;
+        }
+        return null;
     }
 
     /**

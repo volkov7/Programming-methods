@@ -63,4 +63,31 @@ public class RedBlackTreeMapTest {
         String treeRepresentation = tree.inorderTraversalString();
         Assert.assertEquals(expected, treeRepresentation);
     }
+
+    @Test
+    public void isEmptyTest() {
+        RedBlackTreeMap<String, Integer> tree = new RedBlackTreeMap<>();
+
+        Assert.assertTrue(tree.isEmpty());
+    }
+
+    @Test
+    public void isNotEmptyTest() {
+        RedBlackTreeMap<String, Integer> tree = new RedBlackTreeMap<>();
+
+        tree.put("s", 21);
+
+        Assert.assertFalse(tree.isEmpty());
+    }
+
+    @Test
+    public void clearTest() {
+        RedBlackTreeMap<String, Integer> tree = new RedBlackTreeMap<>();
+
+        tree.put("s", 21);
+        Assert.assertFalse(tree.isEmpty());
+
+        tree.clear();
+        Assert.assertTrue(tree.isEmpty());
+    }
 }

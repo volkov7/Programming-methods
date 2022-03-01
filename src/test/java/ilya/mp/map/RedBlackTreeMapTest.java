@@ -3,8 +3,6 @@ package ilya.mp.map;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.NoSuchElementException;
-
 public class RedBlackTreeMapTest {
 
     /**
@@ -148,6 +146,14 @@ public class RedBlackTreeMapTest {
         String result = sb.toString();
 
         Assert.assertEquals(expected, result);
+    }
+
+    @Test
+    public void copyConstructorTest() {
+        RedBlackTreeMap<String, Integer> src = generateBigTree();
+        RedBlackTreeMap<String, Integer> copy = new RedBlackTreeMap<>(src);
+
+        Assert.assertEquals(src.getSize(), copy.getSize());
     }
 
     private RedBlackTreeMap<String, Integer> generateBigTree() {

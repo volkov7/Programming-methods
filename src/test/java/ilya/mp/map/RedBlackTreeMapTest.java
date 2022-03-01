@@ -3,6 +3,8 @@ package ilya.mp.map;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.NoSuchElementException;
+
 public class RedBlackTreeMapTest {
 
     /**
@@ -91,7 +93,7 @@ public class RedBlackTreeMapTest {
 
         tree.put(key, 21);
 
-        Assert.assertTrue(tree.contains(key));
+        Assert.assertTrue(tree.containsKey(key));
     }
 
     @Test
@@ -102,13 +104,13 @@ public class RedBlackTreeMapTest {
 
         tree.put(key, 21);
 
-        Assert.assertFalse(tree.contains(nonExistingKey));
+        Assert.assertFalse(tree.containsKey(nonExistingKey));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void containsNullTest() {
         RedBlackTreeMap<String, Integer> tree = new RedBlackTreeMap<>();
-        tree.contains(null);
+        tree.containsKey(null);
     }
 
     @Test
@@ -132,6 +134,20 @@ public class RedBlackTreeMapTest {
     public void getNullKeyTest() {
         RedBlackTreeMap<String, Integer> tree = generateBigTree();
         tree.get(null);
+    }
+
+    @Test
+    public void iterationTest() {
+        String expected = "abcfghmqrtwy";
+        RedBlackTreeMap<String, Integer> tree = generateBigTree();
+
+        StringBuilder sb = new StringBuilder();
+        for(RedBlackTreeMap.Node<String, Integer> node : tree.entryNode()) {
+            sb.append(node.getKey());
+        }
+        String result = sb.toString();
+
+        Assert.assertEquals(expected, result);
     }
 
     private RedBlackTreeMap<String, Integer> generateBigTree() {

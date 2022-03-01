@@ -1,5 +1,8 @@
 package ilya.mp.map;
 
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+
 public class RedBlackTreeMap<K extends Comparable<K>, V> {
 
     private static final boolean BLACK = true;
@@ -24,7 +27,7 @@ public class RedBlackTreeMap<K extends Comparable<K>, V> {
     /**
      * @return {@code true} if mat contain given key, {@code null} otherwise.
      */
-    public boolean contains(K key) {
+    public boolean containsKey(K key) {
         return getNode(key) != null;
     }
 
@@ -201,6 +204,10 @@ public class RedBlackTreeMap<K extends Comparable<K>, V> {
         node.parent = left;
     }
 
+    public EntryNode entryNode() {
+        return new EntryNode();
+    }
+
     /**
      * Removes all of the mappings from this map.
      * The map will be empty after this call returns.
@@ -240,7 +247,7 @@ public class RedBlackTreeMap<K extends Comparable<K>, V> {
     }
 
     // New node is always black
-    static class Node<K extends Comparable<K>, V> {
+    static final class Node<K extends Comparable<K>, V> {
         private K key;
         private V value;
         private boolean color;
@@ -253,6 +260,81 @@ public class RedBlackTreeMap<K extends Comparable<K>, V> {
             this.value = value;
             this.color = BLACK;
             this.parent = parent;
+        }
+
+        public K getKey() {
+            return key;
+        }
+
+        public V getValue() {
+            return value;
+        }
+    }
+
+    class EntryNode implements Iterable<Node<K, V>> {
+        @Override
+        public Iterator<Node<K, V>> iterator() {
+            return new InorderTreeIterator(root);
+        }
+    }
+
+    abstract class TreeIterator<T> implements Iterator<T> {
+        protected Node<K, V> next;
+
+        public TreeIterator(Node<K, V> root) {
+            this.next = root;
+
+            if (next == null) {
+                return;
+            }
+            while (next.left != null) {
+                next = next.left;
+            }
+        }
+
+        @Override
+        public boolean hasNext() {
+            return next != null;
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException("Currently not implemented.");
+        }
+    }
+
+    final class InorderTreeIterator extends TreeIterator<Node<K, V>> {
+        public InorderTreeIterator(Node<K, V> root) {
+            super(root);
+        }
+
+        @Override
+        public Node<K, V> next() {
+            Node<K, V> e = next;
+
+            if (e == null) {
+                throw new NoSuchElementException();
+            }
+            // If you can walk right, walk right, then fully left.
+            // otherwise, walk up until you come from left.
+            if(next.right != null) {
+                next = next.right;
+                while (next.left != null)
+                    next = next.left;
+                return e;
+            }
+
+            while(true) {
+                if(next.parent == null) {
+                    next = null;
+                    return e;
+                }
+                if(next.parent.left == next) {
+                    next = next.parent;
+                    return e;
+                }
+                next = next.parent;
+            }
         }
     }
 }

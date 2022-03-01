@@ -15,6 +15,15 @@ public class RedBlackTreeMap<K extends Comparable<K>, V> {
     }
 
     /**
+     * Copy constructor. Order of the previous tree is not saved.
+     */
+    public RedBlackTreeMap(RedBlackTreeMap<K, V> source) {
+        for (RedBlackTreeMap.Node<K, V> node : source.entryNode()) {
+            put(node.getKey(), node.getValue());
+        }
+    }
+
+    /**
      * Find node by specified key and return value.
      *
      * @return value if map contain given key, {@code null} otherwise.

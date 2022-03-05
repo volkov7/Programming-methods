@@ -156,6 +156,53 @@ public class RedBlackTreeMapTest {
         Assert.assertEquals(src.getSize(), copy.getSize());
     }
 
+    /**
+     * Finally tree view:
+     *             --------------g---------------
+     *             |                            |
+     *          ---c---                     ----q----
+     *          |     |                     |       |
+     *          a     f                   --m     --w--
+     *                                    |       |   |
+     *                                    h       t   y
+     */
+    @Test
+    public void removeTest() {
+        String expected = "acfghmqtwy";
+        RedBlackTreeMap<String, Integer> tree = generateBigTree();
+
+        Integer rValue = tree.remove("r");
+        Integer bValue = tree.remove("b");
+        Assert.assertEquals(Integer.valueOf(23), rValue);
+        Assert.assertEquals(Integer.valueOf(27), bValue);
+        Assert.assertEquals(expected, tree.inorderTraversalString());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void removeNull() {
+        RedBlackTreeMap<String, Integer> tree = generateBigTree();
+
+        tree.remove(null);
+    }
+
+    @Test
+    public void removeNonExisting() {
+        RedBlackTreeMap<String, Integer> tree = generateBigTree();
+
+        Integer result = tree.remove("NonExistingKey");
+        Assert.assertNull(result);
+    }
+
+    /**
+     * Generated tree:
+     *             --------------g---------------
+     *             |                            |
+     *          ---b---                     ----r----
+     *          |     |                     |       |
+     *          a     c---                --m--   --w--
+     *                   |                |   |   |   |
+     *                   f                h   q   t   y
+     */
     private RedBlackTreeMap<String, Integer> generateBigTree() {
         RedBlackTreeMap<String, Integer> tree = new RedBlackTreeMap<>();
 

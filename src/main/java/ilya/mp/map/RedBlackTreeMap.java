@@ -34,7 +34,7 @@ public class RedBlackTreeMap<K extends Comparable<K>, V> {
     }
 
     /**
-     * @return {@code true} if mat contain given key, {@code null} otherwise.
+     * @return {@code true} if map contain given key, {@code null} otherwise.
      */
     public boolean containsKey(K key) {
         return getNode(key) != null;
@@ -59,6 +59,172 @@ public class RedBlackTreeMap<K extends Comparable<K>, V> {
             balanceAfterPut(freshNode);
             size++;
         }
+    }
+
+    /**
+     * Removing node by given key.
+     *
+     * @return value by key.
+     */
+    public V remove(K key) {
+        Node<K, V> toRemove = getNode(key);
+
+        if (toRemove == null) {
+            return null;
+        }
+        V oldValue = toRemove.value;
+        deleteNode(toRemove);
+        return oldValue;
+    }
+
+    private void deleteNode(Node<K, V> node) {
+        // node is always not null
+        if (node.left != null && node.right != null) {
+            Node<K, V> precursor = precursorOf(node);
+            node.key = precursor.key;
+            node.value = precursor.value;
+            node = precursor;
+        }
+        Node<K, V> replace = node.left != null ? node.left : node.right;
+        if (replace != null) {
+            replace.parent = node.parent;
+            if (node.parent == null) {
+                root = replace;
+            } else if (node.parent.left == node) {
+                node.parent.left = replace;
+            } else {
+                node.parent.right = replace;
+            }
+            node.left = null;
+            node.right = null;
+            node.parent = null;
+            if (node.color == BLACK) {
+                balanceAfterRemove(replace);
+            }
+        } else {
+            if (node.color == BLACK) {
+                balanceAfterRemove(node);
+            }
+            if (node.parent != null) {
+                if (node.parent.left == node) {
+                    node.parent.left = null;
+                } else {
+                    node.parent.right = null;
+                }
+                node.parent = null;
+            } else {
+                root = null;
+            }
+        }
+    }
+
+    private void balanceAfterRemove(Node<K,V> node) {
+        while (node != root && getColor(node) == BLACK) {
+            // Delete the left node whose node is the parent node
+            if (leftOf(parentOf(node)) == node) {
+                Node<K, V> rBro = rightOf(parentOf(node));
+                // brother is red, situation 4
+                if (getColor(rBro) == RED) {
+                    leftRotate(parentOf(node));
+                    rBro = rightOf(parentOf(node));
+                }
+                // Brother is black and there is no red node, situation 5
+                if (getColor(leftOf(rBro)) == BLACK && getColor(rightOf(rBro)) == BLACK) {
+                    setColor(rBro, RED);
+                    node = parentOf(node);
+                } else {
+                    // Brothers are black with red nodes 1-3
+                    if (getColor(rightOf(rBro)) == BLACK) {
+                        rightRotate(rBro);
+                        rBro = rightOf(parentOf(node));
+                    }
+                    leftRotate(parentOf(node));
+                    setColor(parentOf(node), BLACK);
+                    setColor(rightOf(rBro), BLACK);
+                    break;
+                }
+            } else {
+                // Delete the right node whose node is the parent node
+                Node<K, V> lBro = leftOf(parentOf(node));
+                if (getColor(lBro) == RED) {
+                    rightRotate(parentOf(node));
+                    lBro = leftOf(node);
+                }
+                if (getColor(rightOf(lBro)) == BLACK && getColor(leftOf(lBro)) == BLACK) {
+                    setColor(lBro, RED);
+                    node = parentOf(node);
+                } else {
+                    // Two red or one red
+                    if (getColor(leftOf(lBro)) == BLACK) {
+                        leftRotate(lBro);
+                        lBro = leftOf(parentOf(node));
+                    }
+                    rightRotate(parentOf(node));
+                    setColor(parentOf(node), BLACK);
+                    setColor(leftOf(lBro), BLACK);
+                    break;
+                }
+            }
+        }
+        //The alternative borrowing point is red and directly turns black. There must be no node below this node
+        setColor(node, BLACK);
+    }
+
+    // It is black when the node is empty because the last layer is black.
+    private boolean getColor(Node<K, V> node) {
+        return node == null ? BLACK : node.color;
+    }
+
+    private void setColor(Node<K, V> node, boolean color) {
+        if (node != null) {
+            node.color = color;
+        }
+    }
+
+    private Node<K, V> parentOf(Node<K, V> child) {
+        return child == null ? null : child.parent;
+    }
+
+    private Node<K, V> leftOf(Node<K, V> node) {
+        return node == null ? null : node.left;
+    }
+
+    private Node<K, V> rightOf(Node<K, V> node) {
+        return node == null ? null : node.right;
+    }
+
+    /**
+     * Find precursor of the given node.
+     *
+     * @param node node to delete.
+     * @return precursor.
+     */
+    private Node<K, V> precursorOf(Node<K, V> node) {
+        // Since the node has two child nodes, there is no need to judge
+        // whether the left node is empty
+        Node<K, V> left = node.left;
+
+        while (left.right != null) {
+            left = left.right;
+        }
+        return left;
+    }
+
+    /**
+     * Find the successor of the current node.
+     *
+     * @param node - node to delete.
+     * @return successor.
+     */
+    private Node<K, V> successorOf(Node<K, V> node) {
+        // Since the node node has two child nodes, there is no need to judge
+        // whether the right side of the node is empty
+        Node<K, V> right = node.right;
+
+        while (right.left != null) {
+            right = right.left;
+        }
+        return right;
     }
 
     /**

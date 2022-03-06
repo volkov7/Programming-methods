@@ -1,5 +1,6 @@
 package ilya.mp.map;
 
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
@@ -10,8 +11,14 @@ public class RedBlackTreeMap<K extends Comparable<K>, V> implements Iterable<Red
 
     private Node<K, V> root;
     private int size;
+    private final Comparator<? super K> comparator;
 
     public RedBlackTreeMap() {
+        comparator = null;
+    }
+
+    public RedBlackTreeMap(Comparator<? super K> comparator) {
+        this.comparator = comparator;
     }
 
     /**
@@ -21,6 +28,7 @@ public class RedBlackTreeMap<K extends Comparable<K>, V> implements Iterable<Red
         for (Node<K, V> kvNode : source) {
             put(kvNode.getKey(), kvNode.getValue());
         }
+        comparator = source.getComparator();
     }
 
     /**
@@ -53,7 +61,7 @@ public class RedBlackTreeMap<K extends Comparable<K>, V> implements Iterable<Red
             root = new Node<>(key, value, null);
             size++;
         } else {
-            freshNode = putNode(root, key, value, null);
+            freshNode = putNode(key, value);
         }
         if (freshNode != null) {
             balanceAfterPut(freshNode);
@@ -241,7 +249,7 @@ public class RedBlackTreeMap<K extends Comparable<K>, V> implements Iterable<Red
         }
         Node<K, V> node = root;
         while (node != null) {
-            int cmp = key.compareTo(node.key);
+            int cmp = compare(key, node.getKey());
             if (cmp < 0)
                 node = node.left;
             else if (cmp > 0)
@@ -253,33 +261,44 @@ public class RedBlackTreeMap<K extends Comparable<K>, V> implements Iterable<Red
     }
 
     /**
-     * Recursively adding new pair [key:value] into the tree.
+     * Adding new pair [key:value] into the tree.
      *
-     * @param node current node.
-     * @param key key
-     * @param value value
-     * @param parent parent node for node param.
      * @return null if the key already exists. And a new node if the key is new.
      */
-    private Node<K, V> putNode(Node<K, V> node, K key, V value, Node<K, V> parent) {
-        if (node == null) {
-            Node<K, V> freshNode = new Node<>(key, value, parent);
-            if (key.compareTo(parent.key) < 0) {
-                parent.left = freshNode;
-            } else {
-                parent.right = freshNode;
-            }
-            return freshNode;
-        }
+    private Node<K, V> putNode(K key, V value) {
+        int cmp;
+        Node<K, V> tail = root;
+        Node<K, V> parent;
 
-        if (key.compareTo(node.key) < 0) {
-            return putNode(node.left, key, value, node);
-        } else if (key.compareTo(node.key) > 0) {
-            return putNode(node.right, key, value, node);
+        do {
+            parent = tail;
+            cmp = compare(key, tail.getKey());
+            if (cmp < 0) {
+                tail = tail.left;
+            } else if (cmp > 0) {
+                tail = tail.right;
+            } else {
+                tail.value = value;
+                return null;
+            }
+        } while (tail != null);
+        Node<K, V> fresh = new Node<>(key, value, parent);
+        if (cmp < 0) {
+            parent.left = fresh;
         } else {
-            node.value = value;
-            return null;
+            parent.right = fresh;
         }
+        return fresh;
+    }
+
+    /**
+     * Compares objects in natural order if the comparator is null,
+     * otherwise use comparator.
+     *
+     * @return -1 if a < b, 1 if a > b, 0 if a == b.
+     */
+    private int compare(K a, K b) {
+        return comparator == null ? a.compareTo(b) : comparator.compare(a, b);
     }
 
     private void balanceAfterPut(Node<K, V> freshNode) {
@@ -400,6 +419,10 @@ public class RedBlackTreeMap<K extends Comparable<K>, V> implements Iterable<Red
     @Override
     public Iterator<Node<K, V>> iterator() {
         return new InorderTreeIterator(root);
+    }
+
+    public Comparator<? super K> getComparator() {
+        return comparator;
     }
 
     /**

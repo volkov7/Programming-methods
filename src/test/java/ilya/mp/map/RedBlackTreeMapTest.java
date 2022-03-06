@@ -3,6 +3,9 @@ package ilya.mp.map;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+
 public class RedBlackTreeMapTest {
 
     /**
@@ -140,7 +143,7 @@ public class RedBlackTreeMapTest {
         RedBlackTreeMap<String, Integer> tree = generateBigTree();
 
         StringBuilder sb = new StringBuilder();
-        for(RedBlackTreeMap.Node<String, Integer> node : tree.entryNode()) {
+        for(RedBlackTreeMap.Node<String, Integer> node : tree) {
             sb.append(node.getKey());
         }
         String result = sb.toString();
@@ -169,12 +172,14 @@ public class RedBlackTreeMapTest {
     @Test
     public void removeTest() {
         String expected = "acfghmqtwy";
+        int expectedSize = 10;
         RedBlackTreeMap<String, Integer> tree = generateBigTree();
 
         Integer rValue = tree.remove("r");
         Integer bValue = tree.remove("b");
         Assert.assertEquals(Integer.valueOf(23), rValue);
         Assert.assertEquals(Integer.valueOf(27), bValue);
+        Assert.assertEquals(expectedSize, tree.getSize());
         Assert.assertEquals(expected, tree.inorderTraversalString());
     }
 
@@ -188,9 +193,43 @@ public class RedBlackTreeMapTest {
     @Test
     public void removeNonExisting() {
         RedBlackTreeMap<String, Integer> tree = generateBigTree();
+        int initialSize = tree.getSize();
 
         Integer result = tree.remove("NonExistingKey");
         Assert.assertNull(result);
+        Assert.assertEquals(initialSize, tree.getSize());
+    }
+
+    @Test
+    public void iteratorEmptyTreeTest() {
+        RedBlackTreeMap<String, Integer> tree = new RedBlackTreeMap<>();
+
+        Iterator<RedBlackTreeMap.Node<String, Integer>> iterator = tree.iterator();
+        Assert.assertFalse(iterator.hasNext());
+    }
+
+    @Test(expected = NoSuchElementException.class)
+    public void iteratorEmptyTreeNextTest() {
+        RedBlackTreeMap<String, Integer> tree = new RedBlackTreeMap<>();
+
+        Iterator<RedBlackTreeMap.Node<String, Integer>> iterator = tree.iterator();
+        iterator.next();
+    }
+
+    @Test
+    public void iteratorRemoveTest() {
+        String expectedTreeView = "acfghmqtwy";
+        RedBlackTreeMap<String, Integer> tree = generateBigTree();
+
+        Iterator<RedBlackTreeMap.Node<String, Integer>> iterator = tree.iterator();
+        while (iterator.hasNext()) {
+            RedBlackTreeMap.Node<String, Integer> next = iterator.next();
+            if ("r".equals(next.getKey()) || "b".equals(next.getKey())) {
+                iterator.remove();
+            }
+        }
+        Assert.assertEquals(10, tree.getSize());
+        Assert.assertEquals(expectedTreeView, tree.inorderTraversalString());
     }
 
     /**

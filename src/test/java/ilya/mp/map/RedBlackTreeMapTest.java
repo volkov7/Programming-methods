@@ -216,6 +216,14 @@ public class RedBlackTreeMapTest {
         iterator.next();
     }
 
+    @Test(expected = IllegalStateException.class)
+    public void iteratorEmptyTreeRemoveTest() {
+        RedBlackTreeMap<String, Integer> tree = new RedBlackTreeMap<>();
+
+        Iterator<RedBlackTreeMap.Node<String, Integer>> iterator = tree.iterator();
+        iterator.remove();
+    }
+
     @Test
     public void iteratorRemoveTest() {
         String expectedTreeView = "acfghmqtwy";

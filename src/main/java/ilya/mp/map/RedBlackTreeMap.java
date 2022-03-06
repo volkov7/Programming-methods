@@ -3,7 +3,7 @@ package ilya.mp.map;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-public class RedBlackTreeMap<K extends Comparable<K>, V> {
+public class RedBlackTreeMap<K extends Comparable<K>, V> implements Iterable<RedBlackTreeMap.Node<K, V>> {
 
     private static final boolean BLACK = true;
     private static final boolean RED = false;
@@ -18,8 +18,8 @@ public class RedBlackTreeMap<K extends Comparable<K>, V> {
      * Copy constructor. Order of the previous tree is not saved.
      */
     public RedBlackTreeMap(RedBlackTreeMap<K, V> source) {
-        for (RedBlackTreeMap.Node<K, V> node : source.entryNode()) {
-            put(node.getKey(), node.getValue());
+        for (Node<K, V> kvNode : source) {
+            put(kvNode.getKey(), kvNode.getValue());
         }
     }
 
@@ -74,6 +74,7 @@ public class RedBlackTreeMap<K extends Comparable<K>, V> {
         }
         V oldValue = toRemove.value;
         deleteNode(toRemove);
+        size--;
         return oldValue;
     }
 
@@ -379,10 +380,6 @@ public class RedBlackTreeMap<K extends Comparable<K>, V> {
         node.parent = left;
     }
 
-    public EntryNode entryNode() {
-        return new EntryNode();
-    }
-
     /**
      * Removes all of the mappings from this map.
      * The map will be empty after this call returns.
@@ -398,6 +395,11 @@ public class RedBlackTreeMap<K extends Comparable<K>, V> {
 
     public int getSize() {
         return size;
+    }
+
+    @Override
+    public Iterator<Node<K, V>> iterator() {
+        return new InorderTreeIterator(root);
     }
 
     /**
@@ -422,7 +424,7 @@ public class RedBlackTreeMap<K extends Comparable<K>, V> {
     }
 
     // New node is always black
-    static final class Node<K extends Comparable<K>, V> {
+    static final class Node<K, V> {
         private K key;
         private V value;
         private boolean color;
@@ -446,15 +448,12 @@ public class RedBlackTreeMap<K extends Comparable<K>, V> {
         }
     }
 
-    class EntryNode implements Iterable<Node<K, V>> {
-        @Override
-        public Iterator<Node<K, V>> iterator() {
-            return new InorderTreeIterator(root);
-        }
-    }
-
+    /**
+     * Base class for TreeMap iterators.
+     */
     abstract class TreeIterator<T> implements Iterator<T> {
         protected Node<K, V> next;
+        protected Node<K, V> lastReturned;
 
         public TreeIterator(Node<K, V> root) {
             this.next = root;
@@ -474,11 +473,16 @@ public class RedBlackTreeMap<K extends Comparable<K>, V> {
 
         @Override
         public void remove() {
-            throw new UnsupportedOperationException("Currently not implemented.");
+            if (lastReturned == null) {
+                throw new IllegalStateException("Last returned element is null");
+            }
+            deleteNode(lastReturned);
+            lastReturned = null;
+            size--;
         }
     }
 
-    final class InorderTreeIterator extends TreeIterator<Node<K, V>> {
+    final class InorderTreeIterator extends TreeIterator<RedBlackTreeMap.Node<K, V>> {
         public InorderTreeIterator(Node<K, V> root) {
             super(root);
         }
@@ -496,16 +500,19 @@ public class RedBlackTreeMap<K extends Comparable<K>, V> {
                 next = next.right;
                 while (next.left != null)
                     next = next.left;
+                lastReturned = e;
                 return e;
             }
 
             while(true) {
                 if(next.parent == null) {
                     next = null;
+                    lastReturned = e;
                     return e;
                 }
                 if(next.parent.left == next) {
                     next = next.parent;
+                    lastReturned = e;
                     return e;
                 }
                 next = next.parent;

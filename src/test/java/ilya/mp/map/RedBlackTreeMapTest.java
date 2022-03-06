@@ -3,6 +3,7 @@ package ilya.mp.map;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
@@ -237,6 +238,28 @@ public class RedBlackTreeMapTest {
             }
         }
         Assert.assertEquals(10, tree.getSize());
+        Assert.assertEquals(expectedTreeView, tree.inorderTraversalString());
+    }
+
+    @Test
+    public void customDescendingComparatorTest() {
+        String expectedTreeView = "321";
+        RedBlackTreeMap<Integer, String> tree = new RedBlackTreeMap<>(
+            new Comparator<Integer>() {
+                @Override
+                public int compare(Integer o1, Integer o2) {
+                    if (o1 < o2) {
+                        return 1;
+                    } else if (o1 > o2) {
+                        return -1;
+                    }
+                    return 0;
+                }
+            }
+        );
+        tree.put(1, "1");
+        tree.put(2, "2");
+        tree.put(3, "3");
         Assert.assertEquals(expectedTreeView, tree.inorderTraversalString());
     }
 
